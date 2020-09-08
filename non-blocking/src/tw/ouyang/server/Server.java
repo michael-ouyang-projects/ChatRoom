@@ -13,22 +13,20 @@ import java.util.List;
 
 public class Server {
 
-    public static void main(String[] args) throws Exception {
+    private final static List<User> users = new ArrayList<>();
+    private final static ByteBuffer buffer = ByteBuffer.allocate(50);
 
-        List<User> users = new ArrayList<>();
-
+    public void start(String host, int port) {
         try (ServerSocketChannel serverChannel = ServerSocketChannel.open();
-                Selector selector = Selector.open();) {
+                Selector selector = Selector.open()) {
 
-            serverChannel.socket().bind(new InetSocketAddress("localhost", 8888));
-            serverChannel.configureBlocking(false);
-            serverChannel.register(selector, SelectionKey.OP_ACCEPT);
+            bindServerToHost(serverChannel, host, port);
+            registerServerToSelector(serverChannel, selector);
             System.out.println("Server Start, On " + serverChannel.getLocalAddress());
 
-            SelectionKey selectionKey = null;
             User user = null;
+            SelectionKey selectionKey = null;
             SocketChannel channel = null;
-            ByteBuffer buffer = ByteBuffer.allocate(50);
 
             while (true) {
                 if (selector.selectNow() > 0) {
@@ -36,81 +34,115 @@ public class Server {
                     while (selectionKeys.hasNext()) {
                         selectionKey = selectionKeys.next();
 
-                        try {
-                            if (selectionKey.isReadable()) {
-                                user = (User) selectionKey.attachment();
-                                channel = user.getChannel();
-                                if (channel.read(buffer) > 0) {
-                                    buffer.flip();
-                                    String message = String.format("From %s: %s \n", user.getName(), new String(buffer.array(), buffer.position(), buffer.limit()));
-                                    users.forEach(loopUser -> {
-                                        loopUser.addMessage(message);
-                                    });
-                                    System.out.print(message);
-                                    buffer.clear();
-                                }
+                        if (selectionKey.isReadable()) {
+                            user = (User) selectionKey.attachment();
+                            channel = user.getChannel();
+                            try {
+                                readMessageFromRemoteClient(user, channel);
+                            } catch (IOException e) {
+                                System.out.println("Remote Client Shutdown, By " + user.getName());
+                                selectionKey.cancel();
+                                channel.close();
+                                continue;
                             }
-                        } catch (IOException e) {
-                            System.out.println("Remote Client Shutdown, By " + user.getName());
-                            selectionKey.cancel();
-                            channel.close();
-                            continue;
                         }
 
-                        try {
-                            if (selectionKey.isWritable()) {
-                                user = (User) selectionKey.attachment();
-                                channel = user.getChannel();
-                                Iterator<String> messages = user.getMessagesForClient().iterator();
-                                while (messages.hasNext()) {
-                                    String message = messages.next();
-                                    buffer.put(message.getBytes());
-                                    buffer.flip();
-                                    while (buffer.hasRemaining()) {
-                                        channel.write(buffer);
-                                    }
-                                    buffer.clear();
-                                    messages.remove();
-                                }
+                        if (selectionKey.isWritable()) {
+                            user = (User) selectionKey.attachment();
+                            channel = user.getChannel();
+                            try {
+                                writeMessagesToRemoteClient(user, channel);
+                            } catch (IOException e) {
+                                System.out.println("Remote Client Shutdown, By " + user.getName());
+                                selectionKey.cancel();
+                                channel.close();
+                                continue;
                             }
-                        } catch (IOException e) {
-                            System.out.println("Remote Client Shutdown, By " + user.getName());
-                            selectionKey.cancel();
-                            channel.close();
-                            continue;
                         }
 
                         if (selectionKey.isAcceptable()) {
-                            channel = serverChannel.accept();
-                            channel.configureBlocking(false);
-                            SelectionKey key = channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
-                            String userName = null;
-                            do {
-                                if (channel.read(buffer) > 0) {
-                                    buffer.flip();
-                                    userName = new String(buffer.array(), buffer.position(), buffer.limit());
-                                    buffer.clear();
-                                }
-                            } while (userName == null);
-                            User newUser = new User(userName, channel);
-                            users.add(newUser);
-                            key.attach(newUser);
-                            System.out.println(String.format("Accept Connection, From %s, By %s", channel.getRemoteAddress(), userName));
+                            channel = acceptConnection(serverChannel);
+                            user = createUser(channel, registerChannelToSelector(channel, selector));
+                            broadcast(user, String.format("%s join the room.", user.getName()));
+                            System.out.println(String.format("Accept Connection, UserName %s, From: %s", user.getName(), channel.getRemoteAddress()));
                         }
 
                         selectionKeys.remove();
                     }
                 }
             }
-
         } catch (IOException e) {
-
             e.printStackTrace();
-
         } finally {
-
             System.out.println("Server Shutdown");
-
         }
     }
+
+    private void bindServerToHost(ServerSocketChannel serverChannel, String host, int port) throws IOException {
+        serverChannel.socket().bind(new InetSocketAddress(host, port));
+    }
+
+    private void registerServerToSelector(ServerSocketChannel serverChannel, Selector selector) throws IOException {
+        serverChannel.configureBlocking(false);
+        serverChannel.register(selector, SelectionKey.OP_ACCEPT);
+    }
+
+    private void readMessageFromRemoteClient(User user, SocketChannel channel) throws IOException {
+        if (channel.read(buffer) > 0) {
+            buffer.flip();
+            String message = String.format("%s => %s \n", user.getName(), new String(buffer.array(), buffer.position(), buffer.limit()));
+            broadcast(user, message);
+            System.out.print(message);
+            buffer.clear();
+        }
+    }
+
+    private void broadcast(User user, String message) {
+        users.forEach(loopUser -> {
+            if (!loopUser.getName().equals(user.getName())) {
+                loopUser.addMessage(message);
+            }
+        });
+    }
+
+    private void writeMessagesToRemoteClient(User user, SocketChannel channel) throws IOException {
+        Iterator<String> messages = user.getMessagesFormOtherUsersIterator();
+        while (messages.hasNext()) {
+            buffer.put(messages.next().getBytes());
+            buffer.flip();
+            while (buffer.hasRemaining()) {
+                channel.write(buffer);
+            }
+            buffer.clear();
+            messages.remove();
+        }
+    }
+
+    private SocketChannel acceptConnection(ServerSocketChannel serverChannel) throws IOException {
+        return serverChannel.accept();
+    }
+
+    private SelectionKey registerChannelToSelector(SocketChannel channel, Selector selector) throws IOException {
+        channel.configureBlocking(false);
+        return channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+    }
+
+    private User createUser(SocketChannel channel, SelectionKey key) throws IOException {
+        User newUser = new User(getUserName(channel), channel);
+        users.add(newUser);
+        key.attach(newUser);
+        return newUser;
+    }
+
+    private String getUserName(SocketChannel channel) throws IOException {
+        while (true) {
+            if (channel.read(buffer) > 0) {
+                buffer.flip();
+                String userName = new String(buffer.array(), buffer.position(), buffer.limit());
+                buffer.clear();
+                return userName;
+            }
+        }
+    }
+
 }

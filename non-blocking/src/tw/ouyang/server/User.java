@@ -2,22 +2,23 @@ package tw.ouyang.server;
 
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class User {
 
     private String name;
     private SocketChannel channel;
-    private List<String> messagesForClient;
+    private List<String> messagesFormOtherUsers;
 
     public User(String name, SocketChannel channel) {
         this.name = name;
         this.channel = channel;
-        this.messagesForClient = new ArrayList<>();
+        this.messagesFormOtherUsers = new ArrayList<>();
     }
 
     public void addMessage(String message) {
-        messagesForClient.add(message);
+        messagesFormOtherUsers.add(message);
     }
 
     public String getName() {
@@ -28,8 +29,8 @@ public class User {
         return channel;
     }
 
-    public List<String> getMessagesForClient() {
-        return messagesForClient;
+    public Iterator<String> getMessagesFormOtherUsersIterator() {
+        return messagesFormOtherUsers.iterator();
     }
 
 }

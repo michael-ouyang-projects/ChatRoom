@@ -6,23 +6,18 @@ import java.util.Scanner;
 public class Typer implements Runnable {
 
     private Scanner scanner;
-    private List<String> messagesForServer;
+    private List<String> messagesForOtherUsers;
 
-    public Typer(Scanner scanner, List<String> messagesForServer) {
+    public Typer(Scanner scanner, List<String> messagesForOtherUsers) {
         this.scanner = scanner;
-        this.messagesForServer = messagesForServer;
+        this.messagesForOtherUsers = messagesForOtherUsers;
     }
 
     @Override
     public void run() {
-
         while (true) {
-
-            System.out.print("Type: ");
-            messagesForServer.add(scanner.nextLine());
-
+            messagesForOtherUsers.add(scanner.nextLine());
         }
-
     }
 
 }
