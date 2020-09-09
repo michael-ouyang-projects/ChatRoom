@@ -41,6 +41,7 @@ public class Server {
                                 readMessageFromRemoteClient(user, channel);
                             } catch (IOException e) {
                                 System.out.println("Remote Client Shutdown, By " + user.getName());
+                                deleteUser(user);
                                 selectionKey.cancel();
                                 channel.close();
                                 continue;
@@ -54,6 +55,7 @@ public class Server {
                                 writeMessagesToRemoteClient(user, channel);
                             } catch (IOException e) {
                                 System.out.println("Remote Client Shutdown, By " + user.getName());
+                                deleteUser(user);
                                 selectionKey.cancel();
                                 channel.close();
                                 continue;
@@ -90,7 +92,7 @@ public class Server {
     private void readMessageFromRemoteClient(User user, SocketChannel channel) throws IOException {
         if (channel.read(buffer) > 0) {
             buffer.flip();
-            String message = String.format("%s: %s \n", user.getName(), new String(buffer.array(), buffer.position(), buffer.limit()));
+            String message = String.format("%s: %s", user.getName(), new String(buffer.array(), buffer.position(), buffer.limit()));
             broadcast(user, message);
             System.out.print(message);
             buffer.clear();
@@ -143,6 +145,10 @@ public class Server {
                 return userName;
             }
         }
+    }
+
+    private void deleteUser(User user) {
+        users.remove(user);
     }
 
 }
