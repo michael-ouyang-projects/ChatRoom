@@ -22,12 +22,10 @@ public class Client {
                 Selector selector = Selector.open();
                 Scanner scanner = new Scanner(System.in)) {
 
-            setUserNameFromConsole(scanner);
             connectToServer(channel, host, port);
             registerChannelToSelector(channel, selector);
             System.out.println("Connected to " + channel.getRemoteAddress());
-
-            new Thread(new Typer(scanner, messagesForServer)).start();
+            addMessage("Amy");
 
             while (true) {
                 if (selector.selectNow() > 0) {
@@ -68,11 +66,6 @@ public class Client {
         }
     }
 
-    private void setUserNameFromConsole(Scanner scanner) {
-        System.out.print("Please enter your name: ");
-        messagesForServer.add(scanner.nextLine());
-    }
-
     private void connectToServer(SocketChannel channel, String host, int port) throws IOException {
         channel.connect(new InetSocketAddress(host, port));
     }
@@ -85,7 +78,8 @@ public class Client {
     private void readMessagesFromRemoteServer(SocketChannel channel) throws IOException {
         if (channel.read(buffer) > 0) {
             buffer.flip();
-            System.out.print(new String(buffer.array(), buffer.position(), buffer.limit()));
+            String message = new String(buffer.array(), buffer.position(), buffer.limit());
+            MainC.getTextArea().append(message);
             buffer.clear();
         }
     }
@@ -101,6 +95,10 @@ public class Client {
             buffer.clear();
             messages.remove();
         }
+    }
+
+    public void addMessage(String message) {
+        messagesForServer.add(message);
     }
 
 }

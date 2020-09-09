@@ -63,7 +63,7 @@ public class Server {
                         if (selectionKey.isAcceptable()) {
                             channel = acceptConnection(serverChannel);
                             user = createUser(channel, registerChannelToSelector(channel, selector));
-                            broadcast(user, String.format("%s join the room.", user.getName()));
+                            broadcast(user, String.format("%s join the room.\n", user.getName()));
                             System.out.println(String.format("Accept Connection, UserName %s, From: %s", user.getName(), channel.getRemoteAddress()));
                         }
 
@@ -90,7 +90,7 @@ public class Server {
     private void readMessageFromRemoteClient(User user, SocketChannel channel) throws IOException {
         if (channel.read(buffer) > 0) {
             buffer.flip();
-            String message = String.format("%s => %s \n", user.getName(), new String(buffer.array(), buffer.position(), buffer.limit()));
+            String message = String.format("%s: %s \n", user.getName(), new String(buffer.array(), buffer.position(), buffer.limit()));
             broadcast(user, message);
             System.out.print(message);
             buffer.clear();
