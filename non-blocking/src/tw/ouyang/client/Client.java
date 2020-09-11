@@ -3,6 +3,8 @@ package tw.ouyang.client;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -18,6 +20,7 @@ public class Client extends JFrame {
     private ClientCtrl clientCtrl;
     private JTextArea displayMessagesArea;
     private JTextArea typeMessageArea;
+    private JButton sendMessageButton;
 
     public static void main(String[] args) {
         new Client();
@@ -59,16 +62,16 @@ public class Client extends JFrame {
             Integer port = Integer.parseInt(portField.getText());
             String userName = userNameField.getText();
             this.remove(connectionPanel);
-            initGui();
-            this.revalidate();
-            this.repaint();
+            initGui(userName);
             new Thread(() -> {
                 requestConnectionToServer(host, port, userName);
             }).start();
         });
 
         this.add(connectionPanel);
+        this.getRootPane().setDefaultButton(connectButton);
         this.setVisible(true);
+        userNameField.requestFocus();
     }
 
     private void initConfiguration() {
@@ -79,9 +82,13 @@ public class Client extends JFrame {
         createClientController();
     }
 
-    private void initGui() {
+    private void initGui(String userName) {
+        this.setTitle("ChatRoom - " + userName);
         this.add(createDisplayBlock(), BorderLayout.NORTH);
         this.add(createUserBlock(), BorderLayout.SOUTH);
+        this.revalidate();
+        this.repaint();
+        typeMessageArea.requestFocus();
     }
 
     private void createClientController() {
@@ -100,20 +107,29 @@ public class Client extends JFrame {
     private JPanel createUserBlock() {
         JPanel userPanel = new JPanel(new BorderLayout());
         userPanel.setPreferredSize(new Dimension(960, 180));
-        userPanel.add(createTypeBlock(), BorderLayout.WEST);
+        userPanel.add(createTypeArea(), BorderLayout.WEST);
         userPanel.add(createSendButton(), BorderLayout.EAST);
         return userPanel;
     }
 
-    private JScrollPane createTypeBlock() {
+    private JScrollPane createTypeArea() {
         typeMessageArea = new JTextArea();
+        typeMessageArea.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    sendMessageButton.doClick();
+                    typeMessageArea.setCaretPosition(1);
+                }
+            }
+        });
         JScrollPane typeMessageScrollPanel = new JScrollPane(typeMessageArea);
         typeMessageScrollPanel.setPreferredSize(new Dimension(780, 180));
         return typeMessageScrollPanel;
     }
 
     private JButton createSendButton() {
-        JButton sendMessageButton = new JButton("Send");
+        sendMessageButton = new JButton("Send");
         sendMessageButton.setPreferredSize(new Dimension(180, 180));
         sendMessageButton.addActionListener(event -> {
             String message = String.format("%s\n", typeMessageArea.getText());
