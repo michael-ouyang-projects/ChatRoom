@@ -16,6 +16,10 @@ public class Server {
     private final static List<User> users = new ArrayList<>();
     private final static ByteBuffer buffer = ByteBuffer.allocate(50);
 
+    public static void main(String[] args) {
+        new Server().start("localhost", 8888);
+    }
+
     public void start(String host, int port) {
         try (ServerSocketChannel serverChannel = ServerSocketChannel.open();
                 Selector selector = Selector.open()) {
