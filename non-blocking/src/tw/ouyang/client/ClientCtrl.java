@@ -32,7 +32,7 @@ public class ClientCtrl {
             addMessage(userName);
 
             while (true) {
-                if (selector.selectNow() > 0) {
+                if (selector.select() > 0) {
                     Iterator<SelectionKey> selectionKeys = selector.selectedKeys().iterator();
                     while (selectionKeys.hasNext()) {
                         SelectionKey selectionKey = selectionKeys.next();

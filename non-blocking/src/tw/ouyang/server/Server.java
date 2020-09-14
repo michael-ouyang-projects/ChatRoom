@@ -33,7 +33,7 @@ public class Server {
             SocketChannel channel = null;
 
             while (true) {
-                if (selector.selectNow() > 0) {
+                if (selector.select() > 0) {
                     Iterator<SelectionKey> selectionKeys = selector.selectedKeys().iterator();
                     while (selectionKeys.hasNext()) {
                         selectionKey = selectionKeys.next();
