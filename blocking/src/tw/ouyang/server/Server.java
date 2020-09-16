@@ -21,14 +21,10 @@ public class Server {
         try (ServerSocket serverSocket = new ServerSocket(8888)) {
             System.out.println("Server Start, On " + serverSocket.getLocalSocketAddress());
             while (true) {
-                try {
-                    User user = acceptConnection(serverSocket);
-                    startCommunication(user);
-                    broadcast(user, String.format("%s join the room.\n", user.getName()));
-                    System.out.println(String.format("Accept Connection, UserName %s, From: %s", user.getName(), user.getSocket().getRemoteSocketAddress()));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                User user = acceptConnection(serverSocket);
+                startCommunication(user);
+                broadcast(user, String.format("%s join the room.\n", user.getName()));
+                System.out.println(String.format("Accept Connection, UserName %s, From: %s", user.getName(), user.getSocket().getRemoteSocketAddress()));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -88,12 +84,11 @@ public class Server {
             while (true) {
                 String message = user.getMessagesFromOtherUsers().poll();
                 if (message != null) {
+                    System.out.println("HI");
                     user.getSocket().getOutputStream().write(message.getBytes());
-                } else {
-                    Thread.sleep(1000);
                 }
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             user.getSocket().close();
             deleteUser(user);
             System.out.println("Remote Client Shutdown, By " + user.getName());

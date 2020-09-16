@@ -3,14 +3,14 @@ package tw.ouyang.client;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ClientCtrl {
 
     private Client clientView;
-    private final Queue<String> messagesForServer = new LinkedList<>();
+    private final Queue<String> messagesForServer = new ConcurrentLinkedQueue<>();
 
     public ClientCtrl(Client clientView) {
         this.clientView = clientView;
@@ -38,11 +38,9 @@ public class ClientCtrl {
                     String message = messagesForServer.poll();
                     if (message != null) {
                         socket.getOutputStream().write(message.getBytes());
-                    } else {
-                        Thread.sleep(1000);
                     }
                 }
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
 

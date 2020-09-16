@@ -1,8 +1,8 @@
 package tw.ouyang.server;
 
 import java.net.Socket;
-import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class User {
 
@@ -13,7 +13,7 @@ public class User {
     public User(String name, Socket socket) {
         this.name = name;
         this.socket = socket;
-        this.messagesFromOtherUsers = new LinkedList<>();
+        this.messagesFromOtherUsers = new ConcurrentLinkedQueue<>();
     }
 
     public void addMessage(String message) {
