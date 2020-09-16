@@ -8,16 +8,16 @@ public class User {
 
     private String name;
     private Socket socket;
-    private Queue<String> messagesFormOtherUsers;
+    private Queue<String> messagesFromOtherUsers;
 
     public User(String name, Socket socket) {
         this.name = name;
         this.socket = socket;
-        this.messagesFormOtherUsers = new LinkedList<>();
+        this.messagesFromOtherUsers = new LinkedList<>();
     }
 
     public void addMessage(String message) {
-        messagesFormOtherUsers.add(message);
+        messagesFromOtherUsers.add(message);
     }
 
     public String getName() {
@@ -28,8 +28,8 @@ public class User {
         return socket;
     }
 
-    public Queue<String> getMessagesFormOtherUsers() {
-        return messagesFormOtherUsers;
+    public Queue<String> getMessagesFromOtherUsers() {
+        return messagesFromOtherUsers;
     }
 
 }

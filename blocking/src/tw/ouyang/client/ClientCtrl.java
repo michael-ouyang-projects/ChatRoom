@@ -38,9 +38,11 @@ public class ClientCtrl {
                     String message = messagesForServer.poll();
                     if (message != null) {
                         socket.getOutputStream().write(message.getBytes());
+                    } else {
+                        Thread.sleep(1000);
                     }
                 }
-            } catch (IOException e) {
+            } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
 

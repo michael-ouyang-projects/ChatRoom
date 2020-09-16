@@ -23,7 +23,6 @@ public class Server {
             while (true) {
                 try {
                     User user = acceptConnection(serverSocket);
-                    users.add(user);
                     startCommunication(user);
                     broadcast(user, String.format("%s join the room.\n", user.getName()));
                     System.out.println(String.format("Accept Connection, UserName %s, From: %s", user.getName(), user.getSocket().getRemoteSocketAddress()));
@@ -40,23 +39,20 @@ public class Server {
 
     private User acceptConnection(ServerSocket serverSocket) throws IOException {
         Socket socket = serverSocket.accept();
+        User user = new User(getUserName(socket), socket);
+        users.add(user);
+        return user;
+    }
+
+    private String getUserName(Socket socket) throws IOException {
         byte[] dataByte = new byte[50];
-        int lenthOfName = socket.getInputStream().read(dataByte);
-        return new User(new String(dataByte, 0, lenthOfName), socket);
+        return new String(dataByte, 0, socket.getInputStream().read(dataByte));
     }
 
     private void startCommunication(User user) {
         executeTask(() -> {
             try {
-                byte[] dataByte = new byte[50];
-                while (true) {
-                    int lenthOfMessage = user.getSocket().getInputStream().read(dataByte);
-                    if (lenthOfMessage > 0) {
-                        String message = String.format("%s: %s", user.getName(), new String(dataByte, 0, lenthOfMessage));
-                        broadcast(user, message);
-                        System.out.print(message);
-                    }
-                }
+                readMessageFromRemoteClient(user);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -64,16 +60,44 @@ public class Server {
 
         executeTask(() -> {
             try {
-                while (true) {
-                    String message = user.getMessagesFormOtherUsers().poll();
-                    if (message != null) {
-                        user.getSocket().getOutputStream().write(message.getBytes());
-                    }
-                }
+                writeMessagesToRemoteClient(user);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
+    }
+
+    private void readMessageFromRemoteClient(User user) throws IOException {
+        try {
+            byte[] dataByte = new byte[50];
+            while (true) {
+                String message = new String(dataByte, 0, user.getSocket().getInputStream().read(dataByte));
+                message = String.format("%s: %s", user.getName(), message);
+                broadcast(user, message);
+                System.out.print(message);
+            }
+        } catch (IOException e) {
+            user.getSocket().close();
+            deleteUser(user);
+            System.out.println("Remote Client Shutdown, By " + user.getName());
+        }
+    }
+
+    private void writeMessagesToRemoteClient(User user) throws IOException {
+        try {
+            while (true) {
+                String message = user.getMessagesFromOtherUsers().poll();
+                if (message != null) {
+                    user.getSocket().getOutputStream().write(message.getBytes());
+                } else {
+                    Thread.sleep(1000);
+                }
+            }
+        } catch (IOException | InterruptedException e) {
+            user.getSocket().close();
+            deleteUser(user);
+            System.out.println("Remote Client Shutdown, By " + user.getName());
+        }
     }
 
     private void broadcast(User user, String message) {
@@ -82,6 +106,10 @@ public class Server {
                 loopUser.addMessage(message);
             }
         });
+    }
+
+    private void deleteUser(User user) {
+        users.remove(user);
     }
 
     private void executeTask(Runnable task) {
