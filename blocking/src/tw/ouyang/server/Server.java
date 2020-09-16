@@ -84,7 +84,6 @@ public class Server {
             while (true) {
                 String message = user.getMessagesFromOtherUsers().poll();
                 if (message != null) {
-                    System.out.println("HI");
                     user.getSocket().getOutputStream().write(message.getBytes());
                 }
             }
