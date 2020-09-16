@@ -8,9 +8,9 @@
 
 #### Demo
 * Start the Server <br/>
-  ![server](pictures/server.png)
+  <img src="https://github.com/michael-ouyang-projects/ChatRoom/blob/master/pictures/server.png" width="600">
 
 * Start the Client <br/>
-  ![client](pictures/client.png)
+  <img src="https://github.com/michael-ouyang-projects/ChatRoom/blob/master/pictures/client.png" width="600">
   
 * Start Communication
