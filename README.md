@@ -18,9 +18,9 @@
   <img src="https://github.com/michael-ouyang-projects/ChatRoom/blob/master/pictures/client.png" width="500">
   
   - Start another client and connect it to the server either, you will see something like this.
-  <img src="https://github.com/michael-ouyang-projects/ChatRoom/blob/master/pictures/connectionLog.png" width="750">
+  <img src="https://github.com/michael-ouyang-projects/ChatRoom/blob/master/pictures/connectionLog.png" width="800">
   
 ----------------------------------------------------------------------------------
   
-**3. Start Communication**
-  <img src="https://github.com/michael-ouyang-projects/ChatRoom/blob/master/pictures/communication.png" width="750">
+**3. Start Communication** <br/>
+  <img src="https://github.com/michael-ouyang-projects/ChatRoom/blob/master/pictures/communication.png" width="800">
