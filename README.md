@@ -13,7 +13,7 @@
   
 ----------------------------------------------------------------------------------
 
-**2. Start the Client**
+**2. Start Clients**
   - Insert the connection info and click the button to connect to the server. <br/>
   <img src="https://github.com/michael-ouyang-projects/ChatRoom/blob/master/pictures/client.png" width="600">
   
