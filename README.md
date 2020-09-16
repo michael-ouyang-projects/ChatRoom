@@ -15,7 +15,7 @@
 
 **2. Start Clients**
   - Insert the connection info and click the button to connect to the server. <br/>
-  <img src="https://github.com/michael-ouyang-projects/ChatRoom/blob/master/pictures/client.png" width="600">
+  <img src="https://github.com/michael-ouyang-projects/ChatRoom/blob/master/pictures/client.png" width="500">
   
   - Start another client and connect it to the server either, you will see something like this.
   <img src="https://github.com/michael-ouyang-projects/ChatRoom/blob/master/pictures/connectionLog.png" width="800">
