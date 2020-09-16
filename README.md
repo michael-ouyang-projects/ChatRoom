@@ -7,13 +7,13 @@
 ----------------------------------------------------------------------------------
 
 ### Demo
-#### Start the Server
+**1. Start the Server**
   - Check the console log to make sure that the server is up and start listening for clients' connections. <br/>
   <img src="https://github.com/michael-ouyang-projects/ChatRoom/blob/master/pictures/server.png" width="600">
   
 ----------------------------------------------------------------------------------
 
-#### Start the Client <br/>
+**2. Start the Client**
   - Insert the connection info and click the button to connect to the server. <br/>
   <img src="https://github.com/michael-ouyang-projects/ChatRoom/blob/master/pictures/client.png" width="600">
   
@@ -22,5 +22,5 @@
   
 ----------------------------------------------------------------------------------
   
-#### Start Communication
+**3. Start Communication**
   <img src="https://github.com/michael-ouyang-projects/ChatRoom/blob/master/pictures/communication.png" width="900">
