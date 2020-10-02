@@ -1,5 +1,5 @@
 # ChatRoom
-### blocking and non-blocking chatroom implement
+### Blocking and Non-Blocking Chatroom Implementation
 
 > 1. Implement blocking using ServerSocket and Socket.
 > 2. Implement non-blocking using ServerSocketChannel, SocketChannel and Buffer.
